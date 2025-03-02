@@ -77,4 +77,10 @@ contract AMM {
 
     // determine how many token1 tokens must be deposited when depositing
     // liquidity for token2
+
+    function calculateToken1Deposit(
+        uint256 _token2Amount
+    ) public view returns (uint256 token1Amount) {
+        token1Amount = (token1Balance * _token2Amount) / token2Balance;
+    }
 }
