@@ -68,7 +68,6 @@ contract AMM {
 
     // determine how many token2 tokens must be deposited when depositing
     // liquidity for token1
-
     function calculateToken2Deposit(
         uint256 _token1Amount
     ) public view returns (uint256 token2Amount) {
@@ -77,10 +76,38 @@ contract AMM {
 
     // determine how many token1 tokens must be deposited when depositing
     // liquidity for token2
-
     function calculateToken1Deposit(
         uint256 _token2Amount
     ) public view returns (uint256 token1Amount) {
         token1Amount = (token1Balance * _token2Amount) / token2Balance;
+    }
+
+    // Returns amount of token2 received when swapping token1
+    function calculateToken1Swap(
+        uint256 _token1Amount
+    ) public view returns (uint256 token2Amount) {
+        uint256 token1After = token1Balance + _token1Amount;
+        uint token2After = K / token1After;
+        token2Amount = token2Balance - token2After;
+
+        // don't let pool go to zero
+        if (token2Amount == token2Balance) {
+            token2Amount--;
+        }
+
+        require(
+            token2Amount < token2Balance,
+            "Swap cannot exceed pool balance"
+        );
+    }
+
+    function swapToken1(
+        uint256 _token1Amount
+    ) external returns (uint256 token2Amount) {
+        // Calculate token2 amount
+        token2Amount = calculateToken1Swap(_token1Amount);
+
+        // Do swap
+        // Emit an event
     }
 }
