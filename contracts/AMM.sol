@@ -108,6 +108,15 @@ contract AMM {
         token2Amount = calculateToken1Swap(_token1Amount);
 
         // Do swap
+        // 1. Transfer token1 tokens out of user wallet into contract
+        token1.transferFrom(msg.sender, address(this), _token1Amount);
+        // 2. Update the token1 balance in the contract
+        token1Balance += _token1Amount;
+        // 3. Update the token2 balance in the contract
+        token2Balance -= token2Amount;
+        // 4. Transfer token2 tokens from contract to user wallet
+        token2.transfer(msg.sender, token2Amount);
+
         // Emit an event
     }
 }
