@@ -4,24 +4,30 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat");
+const hre = require('hardhat');
 
 async function main() {
-  const NAME = 'Dapp University'
-  const SYMBOL = 'DAPP'
-  const MAX_SUPPLY = '1000000'
+	const Token = await hre.ethers.getContractFactory('Token');
 
-  // Deploy Token
-  const Token = await hre.ethers.getContractFactory('Token')
-  let token = await Token.deploy(NAME, SYMBOL, MAX_SUPPLY)
+	// Deploy Token1
+	let dapp = await Token.deploy('Dapp token', 'DAPP', '1000000');
+	await dapp.deployed();
+	console.log(`Token1 deployed to: ${dapp.address}\n`);
 
-  await token.deployed()
-  console.log(`Token deployed to: ${token.address}\n`)
+	const usd = await Token.deploy('USD token', 'USD', '1000000');
+	await usd.deployed();
+	console.log(`Token2 deployed to: ${usd.address}\n`);
+
+	// Deploy AMM
+	const AMM = await hre.ethers.getContractFactory('AMM');
+	const amm = await AMM.deploy(dapp.address, usd.address);
+
+	console.log(`AMM contract deployed to: ${amm.address}\n`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+	console.error(error);
+	process.exitCode = 1;
 });
