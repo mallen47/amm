@@ -6,6 +6,7 @@ const tokens = (n) => {
 };
 
 const ether = tokens;
+const shares = ether;
 
 describe('AMM', () => {
 	let accounts, deployer, liquidityProvider, investor1, investor2;
@@ -144,9 +145,9 @@ describe('AMM', () => {
 
 			// check prices before swapping
 			console.log(
-				`Price before swapping: ${
+				`\nPrice before swapping: ${
 					(await amm.token2Balance()) / (await amm.token1Balance())
-				}\n`
+				}`
 			);
 
 			// Investor 1 swaps all tokens
@@ -160,7 +161,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor1 token2 balance before swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 
 			// Estimate amount of tokens investor1 will receive after swapping token1, including slippage
@@ -168,7 +169,7 @@ describe('AMM', () => {
 			console.log(
 				`Token2 amount investor1 will receive after swap: ${ethers.utils.formatEther(
 					estimate
-				)}\n`
+				)}`
 			);
 
 			// Investor1 swaps 1 token1
@@ -197,7 +198,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor1 Token2 balance after swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 			expect(balance).to.equal(estimate);
 
@@ -225,7 +226,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor1 token2 balance before swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 
 			// Estimate amount of tokens investor1 will receive after swapping token1, including slippage
@@ -233,7 +234,7 @@ describe('AMM', () => {
 			console.log(
 				`Token2 amount investor1 will receive after swap: ${ethers.utils.formatEther(
 					estimate
-				)}\n`
+				)}`
 			);
 
 			// Investor1 swaps 1 token1
@@ -245,7 +246,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor1 Token2 balance after swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 
 			// Check AMM token balances are in sync
@@ -272,7 +273,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor1 token2 balance before swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 
 			// Estimate amount of tokens investor1 will receive after swapping token1, including slippage
@@ -280,7 +281,7 @@ describe('AMM', () => {
 			console.log(
 				`Token2 amount investor1 will receive after swap: ${ethers.utils.formatEther(
 					estimate
-				)}\n`
+				)}`
 			);
 
 			// Investor1 swaps 1 token1
@@ -294,7 +295,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor1 Token2 balance after swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 
 			// Check AMM token balances are in sync
@@ -328,7 +329,7 @@ describe('AMM', () => {
 			console.log(
 				`Investor2 token1 balance before swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 
 			// Estimate amount of tokens investor2 will receive after swapping token2: includes slippage
@@ -336,7 +337,7 @@ describe('AMM', () => {
 			console.log(
 				`Token1 amount investor2 will receive after swap: ${ethers.utils.formatEther(
 					estimate
-				)}\n`
+				)}`
 			);
 
 			// // Investor2 swaps 1 token
@@ -365,24 +366,75 @@ describe('AMM', () => {
 			console.log(
 				`Investor2 Token1 balance after swap: ${ethers.utils.formatEther(
 					balance
-				)}\n`
+				)}`
 			);
 			expect(estimate).to.equal(balance);
+
+			// Check AMM token balances are in sync
+			expect(await token1.balanceOf(amm.address)).to.be.equal(
+				await amm.token1Balance()
+			);
+			expect(await token2.balanceOf(amm.address)).to.be.equal(
+				await amm.token2Balance()
+			);
+
+			// check prices after swapping
+			console.log(
+				`Price after swapping: ${
+					(await amm.token1Balance()) / (await amm.token2Balance())
+				}\n`
+			);
+
+			////////////////////////////////////////
+			// Removing Liquidity
+
+			// Check LP balances for token1 and token2 before removing tokens
+			console.log(
+				`AMM Token1 Balance: ${ethers.utils.formatEther(
+					await amm.token1Balance()
+				)}`
+			);
+			console.log(
+				`AMM Token2 Balance: ${ethers.utils.formatEther(
+					await amm.token2Balance()
+				)}`
+			);
+
+			// Check LP balance before removing tokens
+			balance = await token1.balanceOf(liquidityProvider.address);
+			console.log(
+				`LP Token1 balance prior to removing funds: ${ethers.utils.formatEther(
+					balance
+				)}`
+			);
+
+			balance = await token2.balanceOf(liquidityProvider.address);
+			console.log(
+				`LP Token2 balance prior to removing funds: ${ethers.utils.formatEther(
+					balance
+				)}`
+			);
+
+			// LP removes tokens from AMM pool
+			transaction = await amm
+				.connect(liquidityProvider)
+				.removeLiquidity(shares(50));
+			await transaction.wait();
+
+			// Check LP balance after removing funds
+			balance = await token1.balanceOf(liquidityProvider.address);
+			console.log(
+				`Liquidity Provider Token1 balance post removing funds: ${ethers.utils.formatEther(
+					balance
+				)}`
+			);
+
+			balance = await token2.balanceOf(liquidityProvider.address);
+			console.log(
+				`Liquidity Provider Token2 balance post removing funds: ${ethers.utils.formatEther(
+					balance
+				)}`
+			);
 		});
-
-		// Check AMM token balances are in sync
-		expect(await token1.balanceOf(amm.address)).to.be.equal(
-			await amm.token1Balance()
-		);
-		expect(await token2.balanceOf(amm.address)).to.be.equal(
-			await amm.token2Balance()
-		);
-
-		// check prices after swapping
-		console.log(
-			`Price after swapping: ${
-				(await amm.token1Balance()) / (await amm.token2Balance())
-			}\n`
-		);
 	});
 });
