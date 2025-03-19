@@ -7,7 +7,12 @@ export const provider = createSlice({
 		chainId: null,
 		account: null,
 	},
-	reducers: {},
+	reducers: {
+		setAccount: (state, action) => {
+			state.account = action.payload;
+		},
+	},
 });
 
+export const { setAccount } = provider.actions;
 export default provider.reducer;

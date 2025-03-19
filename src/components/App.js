@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Container } from 'react-bootstrap'
-import { ethers } from 'ethers'
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Container } from 'react-bootstrap';
+import { ethers } from 'ethers';
 
 // Components
 import Navigation from './Navigation';
@@ -11,52 +12,62 @@ import Loading from './Loading';
 
 // Config: Import your network config here
 // import config from '../config.json';
+import { setAccount } from '../store/reducers/provider';
 
 function App() {
-  const [account, setAccount] = useState(null)
-  const [balance, setBalance] = useState(0)
+	let account = '0x0...';
 
-  const [isLoading, setIsLoading] = useState(true)
+	const [balance, setBalance] = useState(0);
 
-  const loadBlockchainData = async () => {
-    // Initiate provider
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+	const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch accounts
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    const account = ethers.utils.getAddress(accounts[0])
-    setAccount(account)
+	const dispatch = useDispatch();
 
-    // Fetch account balance
-    let balance = await provider.getBalance(account)
-    balance = ethers.utils.formatUnits(balance, 18)
-    setBalance(balance)
+	const loadBlockchainData = async () => {
+		// Initiate provider
+		const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    setIsLoading(false)
-  }
+		// Fetch accounts
+		const accounts = await window.ethereum.request({
+			method: 'eth_requestAccounts',
+		});
+		const account = ethers.utils.getAddress(accounts[0]);
+		dispatch(setAccount(account));
 
-  useEffect(() => {
-    if (isLoading) {
-      loadBlockchainData()
-    }
-  }, [isLoading]);
+		// Fetch account balance
+		let balance = await provider.getBalance(account);
+		balance = ethers.utils.formatUnits(balance, 18);
+		setBalance(balance);
 
-  return(
-    <Container>
-      <Navigation account={account} />
+		setIsLoading(false);
+	};
 
-      <h1 className='my-4 text-center'>React Hardhat Template</h1>
+	useEffect(() => {
+		if (isLoading) {
+			loadBlockchainData();
+		}
+	}, [isLoading]);
 
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <>
-          <p className='text-center'><strong>Your ETH Balance:</strong> {balance} ETH</p>
-          <p className='text-center'>Edit App.js to add your code here.</p>
-        </>
-      )}
-    </Container>
-  )
+	return (
+		<Container>
+			<Navigation account={account} />
+
+			<h1 className='my-4 text-center'>React Hardhat Template</h1>
+
+			{isLoading ? (
+				<Loading />
+			) : (
+				<>
+					<p className='text-center'>
+						<strong>Your ETH Balance:</strong> {balance} ETH
+					</p>
+					<p className='text-center'>
+						Edit App.js to add your code here.
+					</p>
+				</>
+			)}
+		</Container>
+	);
 }
 
 export default App;
