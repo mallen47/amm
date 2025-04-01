@@ -19,10 +19,13 @@ function App() {
 		// Initiate provider
 		const provider = loadProvider(dispatch);
 
+		// Fetch current netowrk's chainId (e.g. hardhat: 31337, kovan: 42)
 		const chainId = await loadNetwork(dispatch, provider);
 
-		// Fetch accounts
-		//await loadAccount(dispatch);
+		// Fetch current account from Metamask when changed
+		window.ethereum.on('accountsChanged', async () => {
+			await loadAccount(dispatch);
+		});
 
 		// Initiate contracts
 		await loadTokens(provider, chainId, dispatch);
