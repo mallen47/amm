@@ -36,7 +36,7 @@ function App() {
 
 	return (
 		<Container>
-			<Navigation account={'0x0...'} />
+			<Navigation />
 
 			<h1 className='my-4 text-center'>React Hardhat Template</h1>
 			<>
