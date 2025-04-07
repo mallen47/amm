@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { setAccount, setProvider, setNetwork } from './reducers/provider';
 import { setContracts, setSymbols, balancesLoaded } from './reducers/tokens';
-import { setContract } from './reducers/amm';
+import { setContract, sharesLoaded } from './reducers/amm';
 import TOKEN_ABI from '../abis/Token.json';
 import AMM_ABI from '../abis/AMM.json';
 import config from '../config.json';
@@ -60,19 +60,19 @@ export const loadTokens = async (provider, chainId, dispatch) => {
 };
 
 export const loadAMM = async (provider, chainId, dispatch) => {
-	const networkConfig = config[String(chainId)];
+	// const networkConfig = config[chainId];
 
-	if (!networkConfig) {
-		console.error(`No config found for chain ID ${chainId}`);
-		return;
-	}
+	// if (!networkConfig) {
+	// 	console.error(`No config found for chain ID ${chainId}`);
+	// 	return;
+	// }
 
 	const amm = new ethers.Contract(
-		networkConfig.amm.address,
+		config[chainId].amm.address,
 		AMM_ABI,
 		provider
 	);
-
+	console.log(`amm ===> ${amm}`);
 	dispatch(setContract(amm));
 
 	return amm;
@@ -82,11 +82,23 @@ export const loadAMM = async (provider, chainId, dispatch) => {
 // LOAD BALANCES & SHARES
 // --------------------------------------
 
-export const loadBalances = async (tokens, account, dispatch) => {
+export const loadBalances = async (amm, tokens, account, dispatch) => {
 	const balance1 = await tokens[0].balanceOf(account);
 	const balance2 = await tokens[1].balanceOf(account);
-	const b1 = ethers.utils.formatUnits(balance1.toString(), 'ether');
-	const b2 = ethers.utils.formatUnits(balance2.toString(), 'ether');
+	const formattedBalance1 = ethers.utils.formatUnits(
+		balance1.toString(),
+		'ether'
+	);
+	const formattedBalance2 = ethers.utils.formatUnits(
+		balance2.toString(),
+		'ether'
+	);
 
-	dispatch(balancesLoaded([b1, b2]));
+	dispatch(balancesLoaded([formattedBalance1, formattedBalance2]));
+	console.log(`about to read shares...`);
+	const shares = await amm.shares(account);
+	console.log(`shares ==> ${shares}`);
+	dispatch(
+		sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether'))
+	);
 };
