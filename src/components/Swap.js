@@ -17,7 +17,9 @@ const Swap = () => {
 	};
 
 	useEffect(() => {
-		getPrice();
+		if (amm) {
+			getPrice();
+		}
 	}, []);
 
 	return (
