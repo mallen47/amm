@@ -16,6 +16,10 @@ const Swap = () => {
 		setPrice((await amm.token2Balance()) / (await amm.token1Balance()));
 	};
 
+	useEffect(() => {
+		getPrice();
+	}, []);
+
 	return (
 		<div>
 			<Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
