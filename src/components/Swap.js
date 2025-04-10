@@ -20,7 +20,7 @@ const Swap = () => {
 		if (amm) {
 			getPrice();
 		}
-	}, []);
+	}, [amm]);
 
 	return (
 		<div>
