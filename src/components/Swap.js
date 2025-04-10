@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -8,7 +9,13 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 
 const Swap = () => {
+	const [price, setPrice] = useState(0);
 	const account = useSelector((state) => state.provider.account);
+	const amm = useSelector((state) => state.amm.contract);
+	const getPrice = async () => {
+		setPrice((await amm.token2Balance()) / (await amm.token1Balance()));
+	};
+
 	return (
 		<div>
 			<Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
@@ -27,7 +34,6 @@ const Swap = () => {
 									placeholder='0.0'
 									min='0.0'
 									step='any'
-									value={0}
 									disabled={false}
 								></Form.Control>
 								<DropdownButton
@@ -50,7 +56,6 @@ const Swap = () => {
 								<Form.Control
 									type='number'
 									placeholder='0.0'
-									value={0}
 									disabled
 								></Form.Control>
 								<DropdownButton
@@ -64,7 +69,7 @@ const Swap = () => {
 						</Row>
 						<Row className='my-3'>
 							<Button type='submit'>Swap</Button>
-							<Form.Text muted>Exchange Rate:</Form.Text>
+							<Form.Text muted>Exchange Rate: {price}</Form.Text>
 						</Row>
 					</Form>
 				) : (
