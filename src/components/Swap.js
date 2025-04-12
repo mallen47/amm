@@ -50,7 +50,7 @@ const Swap = () => {
 									placeholder='0.0'
 									min='0.0'
 									step='any'
-									disabled={false}
+									disabled={!inputToken}
 								></Form.Control>
 								<DropdownButton
 									variant='outline-secondary'
