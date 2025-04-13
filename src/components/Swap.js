@@ -14,10 +14,14 @@ const Swap = () => {
 	const [outputToken, setOutputToken] = useState(null);
 	const [inputAmount, setInputAmount] = useState(0);
 	const [outputAmount, setOutputAmount] = useState(0);
-
 	const [price, setPrice] = useState(0);
+
 	const account = useSelector((state) => state.provider.account);
+	const tokens = useSelector((state) => state.tokens.contracts);
+	const symbols = useSelector((state) => state.tokens.symbols);
+	const balances = useSelector((state) => state.tokens.balances);
 	const amm = useSelector((state) => state.amm.contract);
+
 	const inputHandler = async (e) => {
 		if (!inputToken || !outputToken) {
 			window.alert('Please select token');
@@ -83,7 +87,14 @@ const Swap = () => {
 								<Form.Label>
 									<strong>Input:</strong>
 								</Form.Label>
-								<Form.Text muted>Balance:</Form.Text>
+								<Form.Text muted>
+									Balance:
+									{inputToken === symbols[0]
+										? balances[0]
+										: inputToken === symbols[1]
+										? balances[1]
+										: 0}
+								</Form.Text>
 							</div>
 							{/* Input values */}
 							<InputGroup>
@@ -123,7 +134,14 @@ const Swap = () => {
 								<Form.Label>
 									<strong>Output:</strong>
 								</Form.Label>
-								<Form.Text muted>Balance:</Form.Text>
+								<Form.Text muted>
+									Balance:
+									{outputToken === symbols[0]
+										? balances[0]
+										: outputToken === symbols[1]
+										? balances[1]
+										: 0}
+								</Form.Text>
 							</div>
 							{/* Output values */}
 							<InputGroup>
