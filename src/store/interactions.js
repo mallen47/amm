@@ -1,7 +1,12 @@
 import { ethers } from 'ethers';
 import { setAccount, setProvider, setNetwork } from './reducers/provider';
 import { setContracts, setSymbols, balancesLoaded } from './reducers/tokens';
-import { setContract, sharesLoaded } from './reducers/amm';
+import {
+	setContract,
+	sharesLoaded,
+	swapRequest,
+	swapSuccess,
+} from './reducers/amm';
 import TOKEN_ABI from '../abis/Token.json';
 import AMM_ABI from '../abis/AMM.json';
 import config from '../config.json';
@@ -108,6 +113,8 @@ export const loadBalances = async (amm, tokens, account, dispatch) => {
 // ---------------------------------------
 
 export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
+	dispatch(swapRequest());
+
 	let transaction;
 
 	const signer = await provider.getSigner();
@@ -121,4 +128,6 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
 		transaction = await amm.connect(signer).swapToken2(amount);
 	}
 	await transaction.wait();
+
+	dispatch(swapSuccess(transaction.hash));
 };

@@ -8,6 +8,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropDownButton';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
+import Spinner from 'react-bootstrap/Spinner';
 import { swap } from '../store/interactions';
 
 const Swap = () => {
@@ -23,7 +24,7 @@ const Swap = () => {
 	const symbols = useSelector((state) => state.tokens.symbols);
 	const balances = useSelector((state) => state.tokens.balances);
 	const amm = useSelector((state) => state.amm.contract);
-
+	const isSwapping = useSelector((state) => state.amm.swapping.isSwapping);
 	const dispatch = useDispatch();
 
 	const inputHandler = async (e) => {
@@ -221,7 +222,17 @@ const Swap = () => {
 							</InputGroup>
 						</Row>
 						<Row className='my-3'>
-							<Button type='submit'>Swap</Button>
+							{isSwapping ? (
+								<Spinner
+									animation='border'
+									style={{
+										display: 'block',
+										margin: '0 auto',
+									}}
+								></Spinner>
+							) : (
+								<Button type='submit'>Swap</Button>
+							)}
 							<Form.Text muted>Exchange Rate: {price}</Form.Text>
 						</Row>
 					</Form>
