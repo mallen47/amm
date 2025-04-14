@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Card from 'react-bootstrap/Card';
@@ -8,6 +8,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropDownButton';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
+import { swap } from '../store/interactions';
 
 const Swap = () => {
 	const [inputToken, setInputToken] = useState(null);
@@ -16,11 +17,14 @@ const Swap = () => {
 	const [outputAmount, setOutputAmount] = useState(0);
 	const [price, setPrice] = useState(0);
 
+	const provider = useSelector((state) => state.provider.connection);
 	const account = useSelector((state) => state.provider.account);
 	const tokens = useSelector((state) => state.tokens.contracts);
 	const symbols = useSelector((state) => state.tokens.symbols);
 	const balances = useSelector((state) => state.tokens.balances);
 	const amm = useSelector((state) => state.amm.contract);
+
+	const dispatch = useDispatch();
 
 	const inputHandler = async (e) => {
 		if (!inputToken || !outputToken) {
@@ -59,6 +63,41 @@ const Swap = () => {
 			setOutputAmount(_token1Amount.toString());
 		}
 	};
+
+	const swapHandler = async (e) => {
+		e.preventDefault();
+
+		if (inputToken === outputToken) {
+			window.alert('Invalid token pair.');
+			return;
+		}
+
+		const _inputAmount = ethers.utils.parseUnits(inputAmount, 'ether');
+
+		// swap token depending upon which one we're doing...
+		if (inputToken === 'DAPP') {
+			await swap(
+				provider,
+				amm,
+				tokens[0],
+				inputToken,
+				_inputAmount,
+				dispatch
+			);
+		} else {
+			await swap(
+				provider,
+				amm,
+				tokens[1],
+				inputToken,
+				_inputAmount,
+				dispatch
+			);
+		}
+
+		console.log('Swaping...');
+	};
+
 	const getPrice = async () => {
 		if (inputToken === outputToken) {
 			setPrice(0);
@@ -81,7 +120,10 @@ const Swap = () => {
 		<div>
 			<Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
 				{account ? (
-					<Form style={{ maxWidth: '450px', margin: '50px auto' }}>
+					<Form
+						onSubmit={swapHandler}
+						style={{ maxWidth: '450px', margin: '50px auto' }}
+					>
 						<Row className='my-3'>
 							<div className='d-flex justify-content-between'>
 								<Form.Label>
