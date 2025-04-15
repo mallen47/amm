@@ -9,7 +9,7 @@ import DropdownButton from 'react-bootstrap/DropDownButton';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
-import { swap } from '../store/interactions';
+import { swap, loadBalances } from '../store/interactions';
 
 const Swap = () => {
 	const [inputToken, setInputToken] = useState(null);
@@ -96,7 +96,8 @@ const Swap = () => {
 			);
 		}
 
-		console.log('Swaping...');
+		await loadBalances(amm, tokens, account, dispatch);
+		await getPrice();
 	};
 
 	const getPrice = async () => {
