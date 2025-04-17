@@ -21,11 +21,33 @@ const Deposit = () => {
 	const symbols = useSelector((state) => state.tokens.symbols);
 	const balances = useSelector((state) => state.tokens.balances);
 
+	const amountHandler = async (e) => {
+		if (e.target.id === 'token1') {
+			setToken1Amount(e.target.value);
+			// fetch value from chain
+
+			// set token2 amount
+			setToken2Amount(e.target.value + 1);
+		} else {
+			setToken2Amount(e.target.value);
+			// fetch value from chain
+			// set token1 amount
+			setToken1Amount(e.target.value + 1);
+		}
+	};
+	const depositHandler = async (e) => {
+		e.preventDefault();
+		console.log('deposit handler...');
+	};
+
 	return (
 		<div>
 			<Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
 				{account ? (
-					<Form style={{ maxWidth: '450px', margin: '50px auto' }}>
+					<Form
+						onSubmit={depositHandler}
+						style={{ maxWidth: '450px', margin: '50px auto' }}
+					>
 						<Row>
 							<Form.Text className='text-end my-2' muted>
 								Balance:{balances[0]}
@@ -39,6 +61,7 @@ const Deposit = () => {
 									min='0.0'
 									step='any'
 									id='token1'
+									onChange={(e) => amountHandler(e)}
 									value={
 										token1Amount === 0 ? '' : token1Amount
 									}
@@ -63,6 +86,7 @@ const Deposit = () => {
 									placeholder='0.0'
 									step='any'
 									id='token2'
+									onChange={(e) => amountHandler(e)}
 									value={
 										token2Amount === 0 ? '' : token2Amount
 									}
