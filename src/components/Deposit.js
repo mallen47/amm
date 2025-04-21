@@ -1,15 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropDownButton';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
-import { swap, loadBalances, addLiquidity } from '../store/interactions';
+import { loadBalances, addLiquidity } from '../store/interactions';
 import Alert from './Alert';
 
 const Deposit = () => {
@@ -24,7 +22,7 @@ const Deposit = () => {
 	const balances = useSelector((state) => state.tokens.balances);
 	const amm = useSelector((state) => state.amm.contract);
 	const isDepositing = useSelector(
-		(state) => state.amm.depositing.isdepositing
+		(state) => state.amm.depositing.isDepositing
 	);
 	const isSuccess = useSelector((state) => state.amm.depositing.isSuccess);
 	const transactionHash = useSelector(
@@ -149,7 +147,17 @@ const Deposit = () => {
 							</InputGroup>
 						</Row>
 						<Row className='my-3'>
-							<Button type='submit'>Deposit</Button>
+							{isDepositing ? (
+								<Spinner
+									animation='border'
+									style={{
+										display: 'block',
+										margin: '0 auto',
+									}}
+								/>
+							) : (
+								<Button type='submit'>Deposit</Button>
+							)}
 						</Row>
 					</Form>
 				) : (
