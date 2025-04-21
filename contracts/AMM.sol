@@ -98,7 +98,7 @@ contract AMM {
         uint256 _token1Amount
     ) public view returns (uint256 token2Amount) {
         uint256 token1After = token1Balance + _token1Amount;
-        uint token2After = K / token1After;
+        uint256 token2After = K / token1After;
         token2Amount = token2Balance - token2After;
 
         // don't let pool go to zero

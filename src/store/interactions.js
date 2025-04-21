@@ -1,7 +1,16 @@
 import { ethers } from 'ethers';
 import { setAccount, setProvider, setNetwork } from './reducers/provider';
 import { setContracts, setSymbols, balancesLoaded } from './reducers/tokens';
-import { setContract, sharesLoaded } from './reducers/amm';
+import {
+	setContract,
+	sharesLoaded,
+	swapRequest,
+	swapSuccess,
+	swapFail,
+	depositRequest,
+	depositSuccess,
+	depositFail,
+} from './reducers/amm';
 import TOKEN_ABI from '../abis/Token.json';
 import AMM_ABI from '../abis/AMM.json';
 import config from '../config.json';
@@ -101,4 +110,70 @@ export const loadBalances = async (amm, tokens, account, dispatch) => {
 	dispatch(
 		sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether'))
 	);
+};
+
+// ---------------------------------------
+// ADD LIQUIDITY
+// ---------------------------------------
+
+export const addLiquidity = async (
+	provider,
+	amm,
+	tokens,
+	amounts,
+	dispatch
+) => {
+	try {
+		dispatch(depositRequest());
+
+		const signer = await provider.getSigner();
+		let transaction;
+
+		transaction = await tokens[0]
+			.connect(signer)
+			.approve(amm.address, amounts[0]);
+		await transaction.wait();
+
+		transaction = await tokens[1]
+			.connect(signer)
+			.approve(amm.address, amounts[1]);
+		await transaction.wait();
+
+		transaction = await amm
+			.connect(signer)
+			.addLiquidity(amounts[0], amounts[1]);
+		await transaction.wait();
+
+		dispatch(depositSuccess(transaction.hash));
+	} catch (error) {
+		dispatch(depositFail());
+	}
+};
+
+// ---------------------------------------
+// SWAP
+// ---------------------------------------
+
+export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
+	try {
+		dispatch(swapRequest());
+
+		let transaction;
+
+		const signer = await provider.getSigner();
+
+		transaction = await token.connect(signer).approve(amm.address, amount);
+		await transaction.wait();
+
+		if (symbol === 'DAPP') {
+			transaction = await amm.connect(signer).swapToken1(amount);
+		} else {
+			transaction = await amm.connect(signer).swapToken2(amount);
+		}
+		await transaction.wait();
+
+		dispatch(swapSuccess(transaction.hash));
+	} catch (e) {
+		dispatch(swapFail());
+	}
 };
