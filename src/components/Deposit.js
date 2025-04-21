@@ -9,7 +9,7 @@ import DropdownButton from 'react-bootstrap/DropDownButton';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
-import { swap, loadBalances } from '../store/interactions';
+import { swap, loadBalances, addLiquidity } from '../store/interactions';
 import Alert from './Alert';
 
 const Deposit = () => {
@@ -20,24 +20,56 @@ const Deposit = () => {
 	const tokens = useSelector((state) => state.tokens.contracts);
 	const symbols = useSelector((state) => state.tokens.symbols);
 	const balances = useSelector((state) => state.tokens.balances);
+	const amm = useSelector((state) => state.amm.contract);
+	const dispatch = useDispatch();
 
 	const amountHandler = async (e) => {
 		if (e.target.id === 'token1') {
 			setToken1Amount(e.target.value);
 			// fetch value from chain
+			const _token1Amount = ethers.utils.parseUnits(
+				e.target.value,
+				'ether'
+			);
+			const result = await amm.calculateToken2Deposit(_token1Amount);
+			const _token2Amount = ethers.utils.formatUnits(
+				result.toString(),
+				'ether'
+			);
 
 			// set token2 amount
-			setToken2Amount(e.target.value + 1);
+			setToken2Amount(_token2Amount);
 		} else {
-			setToken2Amount(e.target.value);
+			setToken1Amount(e.target.value);
+
 			// fetch value from chain
+			setToken2Amount(e.target.value);
+			const _token2Amount = ethers.utils.parseUnits(
+				e.target.value,
+				'ether'
+			);
+			const result = await amm.calculateToken1Deposit(_token2Amount);
+			const _token1Amount = ethers.utils.formatUnits(
+				result.toString(),
+				'ether'
+			);
+
 			// set token1 amount
-			setToken1Amount(e.target.value + 1);
+			setToken1Amount(_token1Amount);
 		}
 	};
 	const depositHandler = async (e) => {
 		e.preventDefault();
-		console.log('deposit handler...');
+		const _token1Amount = ethers.utils.parseUnits(token1Amount, 'ether');
+		const _token2Amount = ethers.utils.parseUnits(token2Amount, 'ether');
+
+		await addLiquidity(provider, amm, tokens, [
+			_token1Amount,
+			_token2Amount,
+			dispatch,
+		]);
+
+		await loadBalances(amm, tokens, account, dispatch);
 	};
 
 	return (
