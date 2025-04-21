@@ -7,6 +7,9 @@ import {
 	swapRequest,
 	swapSuccess,
 	swapFail,
+	depositRequest,
+	depositSuccess,
+	depositFail,
 } from './reducers/amm';
 import TOKEN_ABI from '../abis/Token.json';
 import AMM_ABI from '../abis/AMM.json';
@@ -120,23 +123,31 @@ export const addLiquidity = async (
 	amounts,
 	dispatch
 ) => {
-	const signer = await provider.getSigner();
-	let transaction;
+	try {
+		dispatch(depositRequest());
 
-	transaction = await tokens[0]
-		.connect(signer)
-		.approve(amm.address, amounts[0]);
-	await transaction.wait();
+		const signer = await provider.getSigner();
+		let transaction;
 
-	transaction = await tokens[1]
-		.connect(signer)
-		.approve(amm.address, amounts[1]);
-	await transaction.wait();
+		transaction = await tokens[0]
+			.connect(signer)
+			.approve(amm.address, amounts[0]);
+		await transaction.wait();
 
-	transaction = await amm
-		.connect(signer)
-		.addLiquidity(amounts[0], amounts[1]);
-	await transaction.wait();
+		transaction = await tokens[1]
+			.connect(signer)
+			.approve(amm.address, amounts[1]);
+		await transaction.wait();
+
+		transaction = await amm
+			.connect(signer)
+			.addLiquidity(amounts[0], amounts[1]);
+		await transaction.wait();
+
+		dispatch(depositSuccess(transaction.hash));
+	} catch (error) {
+		dispatch(depositFail());
+	}
 };
 
 // ---------------------------------------

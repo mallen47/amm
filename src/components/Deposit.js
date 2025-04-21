@@ -15,12 +15,22 @@ import Alert from './Alert';
 const Deposit = () => {
 	const [token1Amount, setToken1Amount] = useState(0);
 	const [token2Amount, setToken2Amount] = useState(0);
+	const [showAlert, setShowAlert] = useState(false);
+
 	const provider = useSelector((state) => state.provider.connection);
 	const account = useSelector((state) => state.provider.account);
 	const tokens = useSelector((state) => state.tokens.contracts);
 	const symbols = useSelector((state) => state.tokens.symbols);
 	const balances = useSelector((state) => state.tokens.balances);
 	const amm = useSelector((state) => state.amm.contract);
+	const isDepositing = useSelector(
+		(state) => state.amm.depositing.isdepositing
+	);
+	const isSuccess = useSelector((state) => state.amm.depositing.isSuccess);
+	const transactionHash = useSelector(
+		(state) => state.amm.depositing.transactionHash
+	);
+
 	const dispatch = useDispatch();
 
 	const amountHandler = async (e) => {
@@ -60,16 +70,23 @@ const Deposit = () => {
 	};
 	const depositHandler = async (e) => {
 		e.preventDefault();
+
+		setShowAlert(false);
+
 		const _token1Amount = ethers.utils.parseUnits(token1Amount, 'ether');
 		const _token2Amount = ethers.utils.parseUnits(token2Amount, 'ether');
 
-		await addLiquidity(provider, amm, tokens, [
-			_token1Amount,
-			_token2Amount,
-			dispatch,
-		]);
+		await addLiquidity(
+			provider,
+			amm,
+			tokens,
+			[_token1Amount, _token2Amount],
+			dispatch
+		);
 
 		await loadBalances(amm, tokens, account, dispatch);
+
+		setShowAlert(true);
 	};
 
 	return (
@@ -144,6 +161,30 @@ const Deposit = () => {
 					</p>
 				)}
 			</Card>
+			{isDepositing ? (
+				<Alert
+					message={'Deposit Pending...'}
+					transactionHash={null}
+					variant={'info'}
+					setShowAlert={setShowAlert}
+				/>
+			) : isSuccess && showAlert ? (
+				<Alert
+					message={'Deposit Successful!'}
+					transactionHash={transactionHash}
+					variant={'success'}
+					setShowAlert={setShowAlert}
+				/>
+			) : !isSuccess && showAlert ? (
+				<Alert
+					message={'Deposit Failed.'}
+					transactionHash={null}
+					variant={'danger'}
+					setShowAlert={setShowAlert}
+				/>
+			) : (
+				<></>
+			)}
 		</div>
 	);
 };
