@@ -14,6 +14,9 @@ import Alert from './Alert';
 const Withdraw = () => {
 	const provider = useSelector((state) => state.provider.connection);
 	const account = useSelector((state) => state.provider.account);
+	const tokens = useSelector((state) => state.tokens.contracts);
+	const balances = useSelector((state) => state.tokens.balances);
+	const shares = useSelector((state) => state.amm.shares);
 
 	const withdrawHandler = async (e) => {
 		e.preventDefault();
@@ -30,7 +33,7 @@ const Withdraw = () => {
 					>
 						<Row>
 							<Form.Text className='text-end my-2' muted>
-								Shares: {0}
+								Shares: {shares}
 							</Form.Text>
 
 							{/* Input values */}
@@ -56,10 +59,12 @@ const Withdraw = () => {
 						<hr />
 						<Row>
 							<p>
-								<strong>DAPP Balance: </strong>0
+								<strong>DAPP Balance: </strong>
+								{balances[0]}
 							</p>
 							<p>
-								<strong>USD Balance: </strong>0
+								<strong>USD Balance: </strong>
+								{balances[1]}
 							</p>
 						</Row>
 					</Form>
