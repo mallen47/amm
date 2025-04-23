@@ -1,5 +1,10 @@
 import { ethers } from 'ethers';
-import { setAccount, setProvider, setNetwork } from './reducers/provider';
+import {
+	setAccount,
+	setProvider,
+	setNetwork,
+	provider,
+} from './reducers/provider';
 import { setContracts, setSymbols, balancesLoaded } from './reducers/tokens';
 import {
 	setContract,
@@ -197,4 +202,16 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
 	} catch (e) {
 		dispatch(swapFail());
 	}
+};
+
+// ---------------------------------------
+// LOAD ALL SWAPS
+// ---------------------------------------
+
+export const loadAllSwaps = async (provider, amm, dispatch) => {
+	// Fetch swaps from Blockchain
+	const block = await provider.getBlockNumber();
+
+	const swapStream = await amm.queryFilter('Swap', 0, block);
+	console.log(swapStream);
 };
