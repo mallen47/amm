@@ -8,19 +8,39 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
-import { loadBalances, addLiquidity } from '../store/interactions';
+import { loadBalances, removeLiquidity } from '../store/interactions';
 import Alert from './Alert';
 
 const Withdraw = () => {
+	const [amount, setAmount] = useState(0);
+	const [showAlert, setShowAlert] = useState(false);
+
 	const provider = useSelector((state) => state.provider.connection);
 	const account = useSelector((state) => state.provider.account);
 	const tokens = useSelector((state) => state.tokens.contracts);
 	const balances = useSelector((state) => state.tokens.balances);
 	const shares = useSelector((state) => state.amm.shares);
 
+	const amm = useSelector((state) => state.amm.contract);
+	const isWithdrawing = useSelector(
+		(state) => state.amm.withdrawing.isWithdrawing
+	);
+	const isSuccess = useSelector((state) => state.amm.withdrawing.isSuccess);
+	const transactionHash = useSelector(
+		(state) => state.amm.withdrawing.transactionHash
+	);
+
+	const dispatch = useDispatch();
+
 	const withdrawHandler = async (e) => {
 		e.preventDefault();
-		console.log('withdrawhandler...');
+		setShowAlert(false);
+		const _shares = ethers.utils.parseUnits(amount.toString(), 'ether');
+		await removeLiquidity(provider, amm, _shares, dispatch);
+		await loadBalances(amm, tokens, account, dispatch);
+
+		setShowAlert(true);
+		setAmount(0);
 	};
 
 	return (
@@ -44,6 +64,8 @@ const Withdraw = () => {
 									min='0.0'
 									step='any'
 									id='shares'
+									value={amount === 0 ? '' : amount}
+									onChange={(e) => setAmount(e.target.value)}
 								></Form.Control>
 								<InputGroup.Text
 									style={{ width: '100px' }}
@@ -54,7 +76,17 @@ const Withdraw = () => {
 							</InputGroup>
 						</Row>
 						<Row className='my-3'>
-							<Button type='submit'>Withdraw</Button>
+							{isWithdrawing ? (
+								<Spinner
+									animation='border'
+									style={{
+										display: 'block',
+										margin: '0 auto',
+									}}
+								/>
+							) : (
+								<Button type='submit'>Withdraw</Button>
+							)}
 						</Row>
 						<hr />
 						<Row>
@@ -77,6 +109,30 @@ const Withdraw = () => {
 					</p>
 				)}
 			</Card>
+			{isWithdrawing ? (
+				<Alert
+					message={'Withdraw Pending...'}
+					transactionHash={null}
+					variant={'info'}
+					setShowAlert={setShowAlert}
+				/>
+			) : isSuccess && showAlert ? (
+				<Alert
+					message={'Withdraw Successful!'}
+					transactionHash={transactionHash}
+					variant={'success'}
+					setShowAlert={setShowAlert}
+				/>
+			) : !isSuccess && showAlert ? (
+				<Alert
+					message={'Withdraw Failed.'}
+					transactionHash={null}
+					variant={'danger'}
+					setShowAlert={setShowAlert}
+				/>
+			) : (
+				<></>
+			)}
 		</div>
 	);
 };
