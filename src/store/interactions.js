@@ -9,6 +9,7 @@ import { setContracts, setSymbols, balancesLoaded } from './reducers/tokens';
 import {
 	setContract,
 	sharesLoaded,
+	swapsLoaded,
 	swapRequest,
 	swapSuccess,
 	swapFail,
@@ -209,9 +210,12 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
 // ---------------------------------------
 
 export const loadAllSwaps = async (provider, amm, dispatch) => {
-	// Fetch swaps from Blockchain
 	const block = await provider.getBlockNumber();
 
 	const swapStream = await amm.queryFilter('Swap', 0, block);
-	console.log(swapStream);
+	const swaps = swapStream.map((event) => {
+		return { hash: event.transactionHash, args: event.args };
+	});
+
+	dispatch(swapsLoaded(swaps));
 };
