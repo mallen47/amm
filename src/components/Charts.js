@@ -2,26 +2,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import Chart from 'react-apexcharts';
 import Table from 'react-bootstrap/Table';
 import { ethers } from 'ethers';
+import { options, series } from './Charts.config';
+import { chartSelector } from '../store/selectors';
 import { useEffect } from 'react';
 import Loading from './Loading';
 import { loadAllSwaps } from '../store/interactions';
-
-const STATE = {
-	options: {
-		chart: {
-			id: 'basic-bar',
-		},
-		xaxis: {
-			categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998],
-		},
-	},
-	series: [
-		{
-			name: 'series-1',
-			data: [30, 40, 45, 50, 49, 60, 70, 91],
-		},
-	],
-};
 
 const Charts = () => {
 	const provider = useSelector((state) => state.provider.connection);
@@ -29,6 +14,7 @@ const Charts = () => {
 	const symbols = useSelector((state) => state.tokens.symbols);
 	const swaps = useSelector((state) => state.amm.swaps);
 	const amm = useSelector((state) => state.amm.contract);
+	const chart = useSelector(chartSelector);
 	const dispatch = useDispatch();
 
 	useEffect(() => {
@@ -40,10 +26,11 @@ const Charts = () => {
 	return (
 		<div>
 			<Chart
-				options={STATE.options}
-				series={STATE.series}
-				type='bar'
-				width='500'
+				options={options}
+				series={series}
+				type='line'
+				height='100%'
+				width='100%'
 			/>
 
 			<hr />
