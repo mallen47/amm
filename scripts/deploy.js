@@ -14,6 +14,7 @@ async function main() {
 	await dapp.deployed();
 	console.log(`Token1 deployed to: ${dapp.address}\n`);
 
+	// Deploy Token2
 	const usd = await Token.deploy('USD token', 'USD', '1000000');
 	await usd.deployed();
 	console.log(`Token2 deployed to: ${usd.address}\n`);

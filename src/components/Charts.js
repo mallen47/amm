@@ -12,7 +12,6 @@ const Charts = () => {
 	const provider = useSelector((state) => state.provider.connection);
 	const tokens = useSelector((state) => state.tokens.contracts);
 	const symbols = useSelector((state) => state.tokens.symbols);
-	const swaps = useSelector((state) => state.amm.swaps);
 	const amm = useSelector((state) => state.amm.contract);
 	const chart = useSelector(chartSelector);
 	const dispatch = useDispatch();
@@ -25,82 +24,90 @@ const Charts = () => {
 
 	return (
 		<div>
-			<Chart
-				options={options}
-				series={series}
-				type='line'
-				height='100%'
-				width='100%'
-			/>
+			{provider && amm ? (
+				<div>
+					<Chart
+						options={options}
+						series={chart ? chart.series : series}
+						type='line'
+						height='100%'
+						width='100%'
+					/>
 
-			<hr />
-			<Table striped bordered hover>
-				<thead>
-					<tr>
-						<th>Transaction Hash</th>
-						<th>Token Give</th>
-						<th>Amount Give</th>
-						<th>Token Get</th>
-						<th>Amount Get</th>
-						<th>User</th>
-						<th>Time</th>
-					</tr>
-				</thead>
-				<tbody>
-					{swaps &&
-						swaps.map((swap, index) => (
-							<tr key={index}>
-								<td>
-									{swap.hash.slice(0, 5) +
-										'...' +
-										swap.hash.slice(61, 66)}
-								</td>
-								<td>
-									{swap.args.tokenGive === tokens[0].address
-										? symbols[0]
-										: symbols[1]}
-								</td>
-								<td>
-									{ethers.utils.formatUnits(
-										swap.args.tokenGiveAmount.toString(),
-										'ether'
-									)}
-								</td>
-								<td>
-									{swap.args.tokenGet === tokens[0].address
-										? symbols[0]
-										: symbols[1]}
-								</td>
-								<td>
-									{ethers.utils.formatUnits(
-										swap.args.tokenGetAmount.toString(),
-										'ether'
-									)}
-								</td>
-								<td>
-									{swap.args.user.slice(0, 5) +
-										'...' +
-										swap.args.user.slice(38, 42)}
-								</td>
-								<td>
-									{new Date(
-										Number(
-											swap.args.timestamp.toString() +
-												'000'
-										)
-									).toLocaleDateString(undefined, {
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric',
-										hour: 'numeric',
-										minute: 'numeric',
-										second: 'numeric',
-									})}
-								</td>
+					<hr />
+					<Table striped bordered hover>
+						<thead>
+							<tr>
+								<th>Transaction Hash</th>
+								<th>Token Give</th>
+								<th>Amount Give</th>
+								<th>Token Get</th>
+								<th>Amount Get</th>
+								<th>User</th>
+								<th>Time</th>
 							</tr>
-						))}
-				</tbody>
-			</Table>
+						</thead>
+						<tbody>
+							{chart.swaps &&
+								chart.swaps.map((swap, index) => (
+									<tr key={index}>
+										<td>
+											{swap.hash.slice(0, 5) +
+												'...' +
+												swap.hash.slice(61, 66)}
+										</td>
+										<td>
+											{swap.args.tokenGive ===
+											tokens[0].address
+												? symbols[0]
+												: symbols[1]}
+										</td>
+										<td>
+											{ethers.utils.formatUnits(
+												swap.args.tokenGiveAmount.toString(),
+												'ether'
+											)}
+										</td>
+										<td>
+											{swap.args.tokenGet ===
+											tokens[0].address
+												? symbols[0]
+												: symbols[1]}
+										</td>
+										<td>
+											{ethers.utils.formatUnits(
+												swap.args.tokenGetAmount.toString(),
+												'ether'
+											)}
+										</td>
+										<td>
+											{swap.args.user.slice(0, 5) +
+												'...' +
+												swap.args.user.slice(38, 42)}
+										</td>
+										<td>
+											{new Date(
+												Number(
+													swap.args.timestamp.toString() +
+														'000'
+												)
+											).toLocaleDateString(undefined, {
+												year: 'numeric',
+												month: 'long',
+												day: 'numeric',
+												hour: 'numeric',
+												minute: 'numeric',
+												second: 'numeric',
+											})}
+										</td>
+									</tr>
+								))}
+						</tbody>
+					</Table>
+				</div>
+			) : (
+				<Loading />
+			)}
 		</div>
 	);
 };
